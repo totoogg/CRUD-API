@@ -8,7 +8,7 @@ class Users {
     return this.users;
   }
 
-  getUserById(id: string): IUser | undefined | code {
+  getUserById(id: string): IUser | code {
     if (!uuidValidate(id)) {
       return '400';
     }
@@ -19,8 +19,22 @@ class Users {
     return '404';
   }
 
-  addUser(user: IUser): void {
-    this.users.push({ ...user, id: uuidv4() });
+  addUser(user: Omit<IUser, 'id'>): IUser | code {
+    if (
+      'username' in user &&
+      'age' in user &&
+      'hobbies' in user &&
+      typeof user.username === 'string' &&
+      typeof user.age === 'string' &&
+      Array.isArray(user.hobbies) &&
+      user.hobbies.every((el) => typeof el === 'string')
+    ) {
+      const newUser = { ...user, id: uuidv4() };
+      this.users.push(newUser);
+      return newUser;
+    } else {
+      return '400';
+    }
   }
 
   deleteUser(id: string): void {
