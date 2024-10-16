@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "eslint --fix",
     "start": "node dist/bundle.js",
-    "start:prod": "webpack",
+    "start:prod": "node --loader ts-node/esm node_modules/webpack-cli/bin/cli.js --config webpack.config.ts && npm start",
     "start:dev": "nodemon src/index.ts"
   },
   "keywords": [],
