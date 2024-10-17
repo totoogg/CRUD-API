@@ -1,18 +1,11 @@
-import { code, IUser } from 'src/model';
-import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
-
 class Users {
-  private users: IUser[] = [];
+  users = [];
 
-  async getUsers(): Promise<IUser[]> {
+  getUsers() {
     return this.users;
   }
 
-  async getUserById(id: string): Promise<IUser | code> {
-    if (!uuidValidate(id)) {
-      return '400';
-    }
-
+  getUserById(id) {
     const user = this.users.find((el) => el.id === id);
 
     if (user) {
@@ -21,7 +14,7 @@ class Users {
     return '404';
   }
 
-  async addUser(user: Omit<IUser, 'id'>): Promise<IUser | code> {
+  addUser(user) {
     if (
       'username' in user &&
       'age' in user &&
@@ -32,7 +25,7 @@ class Users {
       Array.isArray(user.hobbies) &&
       user.hobbies.every((el) => typeof el === 'string')
     ) {
-      const newUser = { ...user, id: uuidv4() };
+      const newUser = { ...user, id: Math.random() };
 
       this.users.push(newUser);
 
@@ -42,7 +35,7 @@ class Users {
     }
   }
 
-  async updateUser(id: string, data: Omit<IUser, 'id'>): Promise<IUser | code> {
+  updateUser(id, data) {
     const userIndex = this.users.findIndex((el) => el.id === id);
 
     if (userIndex === -1) {
@@ -67,7 +60,7 @@ class Users {
     }
   }
 
-  async deleteUser(id: string): Promise<string | undefined> {
+  deleteUser(id) {
     const index = this.users.findIndex((el) => el.id === id);
     const userId = this.users[index].id;
 
