@@ -22,17 +22,13 @@ class Users {
   }
 
   async addUser(user: Omit<IUser, 'id'>): Promise<IUser | code> {
-    if (
-      'username' in user &&
-      'age' in user &&
-      'hobbies' in user &&
-      typeof user.username === 'string' &&
-      typeof user.age === 'string' &&
-      Number(user.age) > 0 &&
-      Array.isArray(user.hobbies) &&
-      user.hobbies.every((el) => typeof el === 'string')
-    ) {
-      const newUser = { ...user, id: uuidv4() };
+    if (await this.checkData(user)) {
+      const newUser = {
+        username: user.username.trim(),
+        age: user.age.trim(),
+        hobbies: user.hobbies.map((el) => el.trim()),
+        id: uuidv4(),
+      };
 
       this.users.push(newUser);
 
@@ -49,17 +45,13 @@ class Users {
       return '404';
     }
 
-    if (
-      'username' in data &&
-      'age' in data &&
-      'hobbies' in data &&
-      typeof data.username === 'string' &&
-      typeof data.age === 'string' &&
-      Number(data.age) > 0 &&
-      Array.isArray(data.hobbies) &&
-      data.hobbies.every((el) => typeof el === 'string')
-    ) {
-      this.users[userIndex] = { ...this.users[userIndex], ...data };
+    if (await this.checkData(data)) {
+      this.users[userIndex] = {
+        ...this.users[userIndex],
+        username: data.username.trim(),
+        age: data.age.trim(),
+        hobbies: data.hobbies.map((el) => el.trim()),
+      };
 
       return this.users[userIndex];
     } else {
@@ -78,6 +70,23 @@ class Users {
     }
 
     return;
+  }
+
+  private async checkData(data: Omit<IUser, 'id'>): Promise<boolean> {
+    return !!(
+      'username' in data &&
+      'age' in data &&
+      'hobbies' in data &&
+      typeof data.username === 'string' &&
+      typeof data.age === 'string' &&
+      Number(data.age) > 0 &&
+      Array.isArray(data.hobbies) &&
+      data.hobbies.every((el) => typeof el === 'string')
+    );
+  }
+
+  async fillUsers(data: string): Promise<void> {
+    this.users = JSON.parse(data);
   }
 }
 
