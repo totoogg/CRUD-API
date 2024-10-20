@@ -4,7 +4,7 @@ import 'dotenv/config';
 
 const PORT = process.env.PORT;
 
-const server = createServer((req, res) => {
+export const server = createServer((req, res) => {
   try {
     if (req.method === 'GET' && req.url === '/api/users') {
       return getUsers(req, res);

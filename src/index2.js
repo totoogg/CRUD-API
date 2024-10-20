@@ -3,100 +3,110 @@ import http from 'node:http';
 import { availableParallelism } from 'node:os';
 import process from 'node:process';
 import { users } from './bd.js';
+import { Buffer } from 'node:buffer';
 
 const numCPUs = availableParallelism();
 
 if (cluster.isPrimary) {
-  console.log(`Primary ${process.pid} is running`);
+  let arrClusters = [];
 
-  // Форк рабочих.
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork({ idCluster: i });
-  }
+  Promise.all(
+    Array(numCPUs - 1)
+      .fill(0)
+      .map((_, i) => {
+        return new Promise((resolve) => {
+          const worker = cluster.fork({ idCluster: i + 1 });
+          worker
+            .on('online', () => resolve(worker))
+            .on('message', (message) => {
+              console.log('message', message);
+              arrClusters.forEach((otherWorker, index) => {
+                if (index !== i) otherWorker?.send(message);
+              });
+            });
+        });
+      }),
+  ).then((workers) => {
+    arrClusters = workers;
+    const server = http.createServer((req, res) => {
+      const request = http.request(
+        {
+          host: '127.0.0.1',
+          port: 8001,
+          path: req.url,
+          method: req.method,
+          headers: req.headers,
+        },
+        (response) => {
+          let chunks = '';
+          response.on('data', (data) => (chunks += data));
+          response.on('end', () => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.write(chunks);
+            res.end();
+          });
+        },
+      );
+      let chunks = [];
+      req.on('data', (data) => chunks.push(data));
+      req.on('end', () => {
+        let resBody = Buffer.concat(chunks);
+        request.write(resBody);
+        request.end();
+      });
+    });
 
-  cluster.on('message', (worker, message) => {
-    console.log('worker', worker);
-    console.log('message', message);
-  });
-
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`рабочий ${worker.process.pid} умер`);
+    server.listen(8000, () => {
+      console.log(`Server start on port 8000`);
+    });
   });
 } else {
-  // Рабочие могут совместно использовать любое TCP-соединение.
-  // В данном случае это HTTP-сервер
   const port = Number(process.env.idCluster);
   process.on('message', (message) => {
     console.log(`message ${port}`, message);
   });
-  http
-    .createServer((req, res) => {
-      if (req.method === 'GET' && req.url === '/api/users') {
-        console.log(port);
-        const response = users.getUsers();
+  const server = http.createServer((req, res) => {
+    if (req.method === 'GET' && req.url === '/api/users') {
+      const response = users.getUsers();
 
-        if (response) {
-          res.statusCode = 200;
-          res.setHeader('Content-Type', 'application/json');
-
-          res.end(JSON.stringify(response));
-        } else {
-          res.statusCode = 500;
-          res.setHeader('Content-Type', 'text/plain');
-
-          res.end('Server error');
-        }
-        process.send({ cmd: 'notifyRequest' });
-      } else if (req.method === 'GET' && req.url?.startsWith('/api/users/')) {
-        const userId = req.url.slice(11);
-        const user = users.getUserById(userId);
-
-        if (user === '400') {
-          res.statusCode = 400;
-          res.setHeader('Content-Type', 'text/plain');
-
-          res.end('Invalid user id');
-        }
-
-        if (user === '404') {
-          res.statusCode = 404;
-          res.setHeader('Content-Type', 'text/plain');
-
-          res.end(`User with id ${userId} does not exist`);
-        }
-
+      if (response) {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
 
-        res.end(JSON.stringify(user));
-      } else if (req.method === 'POST' && req.url === '/api/users') {
-        if (req.headers['content-type'] === 'application/json') {
-          let data = '';
+        res.end(JSON.stringify(response));
+      } else {
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain');
 
-          req.on('data', (chunk) => {
-            data += chunk;
-          });
-
-          req.on('end', () => {
-            const user = users.addUser(JSON.parse(data));
-
-            if (user === '400') {
-              res.statusCode = 400;
-              res.setHeader('Content-Type', 'text/plain');
-
-              res.end('Incorrect data for user creation');
-            }
-
-            res.setHeader('Content-Type', 'application/json');
-
-            res.end(JSON.stringify(user));
-          });
-        }
+        res.end('Server error');
       }
-    })
-    .listen(8000 + port, () => {
-      console.log(8000 + port);
-    });
+      process.send('notifyRequest');
+    } else if (req.method === 'POST' && req.url === '/api/users') {
+      if (req.headers['content-type'] === 'application/json') {
+        let data = '';
 
-  console.log(`Worker ${process.pid} started`);
+        req.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        req.on('end', () => {
+          const user = users.addUser(JSON.parse(data));
+
+          if (user === '400') {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'text/plain');
+
+            res.end('Incorrect data for user creation');
+          }
+
+          res.setHeader('Content-Type', 'application/json');
+
+          res.end(JSON.stringify(user));
+        });
+      }
+    }
+  });
+  server.listen(8000 + port, () => {
+    console.log(`Worker ${process.pid} started port ${8000 + port}`);
+  });
 }
