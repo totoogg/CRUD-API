@@ -9,7 +9,8 @@
     "test": "jest",
     "start": "node dist/bundle.js",
     "start:prod": "node --no-warnings=ExperimentalWarning --loader ts-node/esm node_modules/webpack-cli/bin/cli.js --config webpack.config.ts && npm start",
-    "start:dev": "nodemon src/index.ts"
+    "start:dev": "nodemon src/index.ts",
+    "start:multi": "nodemon src/multiIndex.ts"
   },
   "keywords": [],
   "author": "",

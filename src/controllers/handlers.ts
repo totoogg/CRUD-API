@@ -8,6 +8,7 @@ export async function getUsers(_: IncomingMessage, res: ServerResponse) {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(response));
+    process.send?.({ action: JSON.stringify(await users.getUsers()) });
   } catch {
     serverError(res, '500', 'Server error');
   }
@@ -26,6 +27,7 @@ export async function getUserById(req: IncomingMessage, res: ServerResponse) {
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify(user));
+      process.send?.({ action: JSON.stringify(await users.getUsers()) });
     }
   } catch {
     serverError(res, '500', 'Server error');
@@ -50,6 +52,7 @@ export async function createUser(req: IncomingMessage, res: ServerResponse) {
           res.statusCode = 201;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify(user));
+          process.send?.({ action: JSON.stringify(await users.getUsers()) });
         }
       });
     } else {
@@ -85,6 +88,7 @@ export async function updateUser(req: IncomingMessage, res: ServerResponse) {
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify(user));
+          process.send?.({ action: JSON.stringify(await users.getUsers()) });
         }
       });
     }
@@ -108,6 +112,7 @@ export async function deleteUser(req: IncomingMessage, res: ServerResponse) {
       res.statusCode = 204;
       res.setHeader('Content-Type', 'text/plain');
       res.end('Successful removal');
+      process.send?.({ action: JSON.stringify(await users.getUsers()) });
     }
   } catch {
     serverError(res, '500', 'Server error');
