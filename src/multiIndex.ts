@@ -52,7 +52,7 @@ if (cluster.isPrimary) {
           let chunks = '';
           response.on('data', (data) => (chunks += data));
           response.on('end', () => {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.writeHead(response.statusCode!, response.headers);
             res.write(chunks);
             res.end();
           });
