@@ -25,7 +25,7 @@ class Users {
     if (await this.checkData(user)) {
       const newUser = {
         username: user.username.trim(),
-        age: user.age.trim(),
+        age: user.age,
         hobbies: user.hobbies.map((el) => el.trim()),
         id: uuidv4(),
       };
@@ -49,7 +49,7 @@ class Users {
       this.users[userIndex] = {
         ...this.users[userIndex],
         username: data.username.trim(),
-        age: data.age.trim(),
+        age: data.age,
         hobbies: data.hobbies.map((el) => el.trim()),
       };
 
@@ -78,7 +78,8 @@ class Users {
       'age' in data &&
       'hobbies' in data &&
       typeof data.username === 'string' &&
-      typeof data.age === 'string' &&
+      typeof data.age === 'number' &&
+      !isNaN(data.age) &&
       Number(data.age) > 0 &&
       Array.isArray(data.hobbies) &&
       data.hobbies.every((el) => typeof el === 'string')

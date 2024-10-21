@@ -23,7 +23,7 @@ describe('POST /api/users', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -46,11 +46,11 @@ describe('POST /api/users', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
-    expect(res.body).toMatchObject({ username: 'asd1', age: '1', hobbies: ['b', 'a'] });
+    expect(res.body).toMatchObject({ username: 'asd1', age: 1, hobbies: ['b', 'a'] });
   });
 });
 
@@ -60,7 +60,7 @@ describe('GET /api/user/{userId}', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -83,12 +83,12 @@ describe('GET /api/user/{userId}', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
     const getUserById = await request(server).get(`/api/users/${res.body.id}`);
-    expect(getUserById.body).toMatchObject({ username: 'asd1', age: '1', hobbies: ['b', 'a'] });
+    expect(getUserById.body).toMatchObject({ username: 'asd1', age: 1, hobbies: ['b', 'a'] });
   });
 });
 
@@ -98,7 +98,7 @@ describe('PUT /api/user/{userId}', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -106,7 +106,7 @@ describe('PUT /api/user/{userId}', () => {
       .put(`/api/users/${res.body.id}`)
       .send({
         username: ' asd1 ',
-        age: '2',
+        age: 2,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -118,7 +118,7 @@ describe('PUT /api/user/{userId}', () => {
       .put(`/api/users/q1`)
       .send({
         username: ' asd1 ',
-        age: '2',
+        age: 2,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -130,7 +130,7 @@ describe('PUT /api/user/{userId}', () => {
       .put(`/api/users/00000000-0000-0000-0000-000000000000`)
       .send({
         username: ' asd1 ',
-        age: '2',
+        age: 2,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -142,7 +142,7 @@ describe('PUT /api/user/{userId}', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -150,11 +150,11 @@ describe('PUT /api/user/{userId}', () => {
       .put(`/api/users/${res.body.id}`)
       .send({
         username: ' asd1 ',
-        age: '2',
+        age: 2,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
-    expect(updateById.body).toMatchObject({ username: 'asd1', age: '2', hobbies: ['b', 'a'] });
+    expect(updateById.body).toMatchObject({ username: 'asd1', age: 2, hobbies: ['b', 'a'] });
     expect(updateById.body.id).toBe(res.body.id);
   });
 });
@@ -165,7 +165,7 @@ describe('DELETE  /api/user/{userId}', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');
@@ -188,7 +188,7 @@ describe('DELETE  /api/user/{userId}', () => {
       .post('/api/users')
       .send({
         username: ' asd1 ',
-        age: ' 1 ',
+        age: 1,
         hobbies: ['b', 'a'],
       })
       .set('Accept', 'application/json');

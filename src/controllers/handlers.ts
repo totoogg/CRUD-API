@@ -2,6 +2,15 @@ import { IncomingMessage, ServerResponse } from 'http';
 import { users } from '../db/index.ts';
 import { code } from '../model/index.ts';
 
+const isValidJSON = (str: string) => {
+  try {
+    JSON.parse(str);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export async function getUsers(_: IncomingMessage, res: ServerResponse) {
   try {
     const response = await users.getUsers();
@@ -44,7 +53,12 @@ export async function createUser(req: IncomingMessage, res: ServerResponse) {
       });
 
       req.on('end', async () => {
-        const user = await users.addUser(JSON.parse(data));
+        let user = {};
+        if (isValidJSON(data)) {
+          user = await users.addUser(JSON.parse(data));
+        } else {
+          user = '400';
+        }
 
         if (user === '400') {
           serverError(res, user, 'Incorrect data for user creation');
@@ -80,10 +94,15 @@ export async function updateUser(req: IncomingMessage, res: ServerResponse) {
       });
 
       req.on('end', async () => {
-        const user = await users.updateUser(userId, JSON.parse(data));
+        let user = {};
+        if (isValidJSON(data)) {
+          user = await users.updateUser(userId, JSON.parse(data));
+        } else {
+          user = '400';
+        }
 
         if (user === '400') {
-          serverError(res, user, 'Incorrect data for user creation');
+          serverError(res, user, 'Incorrect data for user update');
         } else {
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json');
